@@ -1,5 +1,3 @@
-#include "config.h"
-
 #include <SensorManager.h>
 #include <CommsOut.h>
 
