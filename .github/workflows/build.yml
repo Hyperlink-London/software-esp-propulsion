@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN }}  # GH_TOKEN must be added as a repo secret
 
       - name: Set up Arduino CLI
         uses: arduino/setup-arduino-cli@v1
