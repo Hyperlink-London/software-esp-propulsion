@@ -31,7 +31,7 @@ jobs:
       - name: Install ESP32 Core
         run: |
           arduino-cli core update-index
-          arduino-cli core install esp32:esp32
+          arduino-cli core install esp32:esp32:esp32doit-devkit-v1
 
       - name: Apply CI config (enable all sensors)
         run: cp propulsion-firmware/config-ci.h propulsion-firmware/config.h
