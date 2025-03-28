@@ -66,11 +66,14 @@ if [ "$UPLOAD_ONLY" = false ]; then
   echo -n "Compiling firmware:  "
   TMP_LOG=$(mktemp)
 
+  # --build-property adds the main sketch directory to include path so config.h is visible in submodules (this was a pain to figure out...)
   arduino-cli compile \
     --fqbn "$FQBN" \
+    --build-property "build.extra_flags=-I$SKETCH_DIR" \
     "$SKETCH_DIR" \
     --libraries $LIBS \
     --output-dir "$BUILD_OUT" > "$TMP_LOG" 2>&1 &
+
   COMP_PID=$!
 
   run_with_spinner $COMP_PID "Compiling firmware:"
