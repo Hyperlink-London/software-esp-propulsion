@@ -38,8 +38,8 @@ jobs:
 
       - name: Ensure all sensors are enabled in config-ci.h
         run: |
-          chmod +x ./scripts/check-sensor-defines.sh
-          ./scripts/check-sensor-defines.sh
+          chmod +x ./scripts/check-config-sensors.sh
+          ./scripts/check-config-sensors.sh
 
       - name: Compile firmware
         run: |
