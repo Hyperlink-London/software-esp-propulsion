@@ -5,13 +5,20 @@ SENSORS_DIR="sensors/src"
 
 missing_defines=()
 
+# Function to convert CamelCase or camelCase to SCREAMING_SNAKE_CASE
+to_macro_case() {
+  echo "$1" |
+    sed -E 's/([a-z])([A-Z])/\1_\2/g' |  # Insert _ between camelCase
+    tr '[:lower:]' '[:upper:]'          # Convert to uppercase
+}
+
 for file in "$SENSORS_DIR"/*.cpp; do
     base=$(basename "$file" .cpp)
 
-    # Skip SensorManager or other non-sensor cpp files
     [[ "$base" == "SensorManager" ]] && continue
 
-    macro="USE_${base^^}"  # Convert to uppercase
+    macro_base=$(to_macro_case "$base")
+    macro="USE_${macro_base}"
 
     if ! grep -q "#define $macro" "$CONFIG_FILE"; then
         missing_defines+=("$macro")
