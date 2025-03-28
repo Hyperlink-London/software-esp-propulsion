@@ -140,6 +140,12 @@ if [ "$UPLOAD" = true ]; then
 
   if [ $UPLOAD_STATUS -eq 0 ]; then
     echo "[${elapsed}s] Upload successful on port: $PORT"
+
+    read -p "Open serial monitor now? (y/N): " RESP
+    if [[ "$RESP" =~ ^[Yy]$ ]]; then
+      echo "Opening serial monitor on $PORT (baud: 9600)..."
+      arduino-cli monitor -p "$PORT"
+    fi
   else
     echo "[${elapsed}s] Upload failed on port: $PORT"
   fi
