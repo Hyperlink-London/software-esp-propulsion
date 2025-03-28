@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Board and paths
-FQBN="esp32:esp32:esp32"
+FQBN="esp32:esp32:esp32doit-devkit-v1"
 SKETCH_DIR="./propulsion-firmware"
 LIBS="./interfaces,./sensors,./comms"
 BUILD_OUT="./build"
