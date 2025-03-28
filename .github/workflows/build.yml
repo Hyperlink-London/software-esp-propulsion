@@ -10,29 +10,58 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      FQBN: esp32:esp32:esp32doit-devkit-v1
+      SKETCH: ./propulsion-firmware
+      LIBS: ./sensors,./comms,./interfaces
+      BUILD_OUT: ./build
+
     steps:
       - name: Checkout repository (with private submodules)
         uses: actions/checkout@v3
         with:
           submodules: recursive
-          token: ${{ secrets.GH_TOKEN }}  # GH_TOKEN must be added as a repo secret
+          token: ${{ secrets.GH_TOKEN }}
 
       - name: Set up Arduino CLI
         uses: arduino/setup-arduino-cli@v1
         with:
           version: 0.34.0
 
-      - name: Install ESP32 core
+      - name: Install ESP32 Core
         run: |
           arduino-cli core update-index
           arduino-cli core install esp32:esp32
-      - name: Apply CI sensor config (enables all sensors)
+
+      - name: Apply CI config (enable all sensors)
         run: cp propulsion-firmware/config-ci.h propulsion-firmware/config.h
 
-      - name: Compile propulsion firmware
+      - name: Ensure all sensors are enabled in config-ci.h
+        run: |
+          SENSOR_HEADERS=$(find sensors/src -maxdepth 1 -type f -name "*.h" -not -name "*Manager*" | sed -E 's#.*/(.*)\.h#\1#')
+          MISSING=0
+
+          echo "Checking sensors in sensors/src..."
+          for SENSOR in $SENSOR_HEADERS; do
+            DEFINE="USE_${SENSOR^^}"
+            if ! grep -q "$DEFINE" propulsion-firmware/config-ci.h; then
+              echo "Missing: $DEFINE in config-ci.h"
+              MISSING=1
+            else
+              echo "Found: $DEFINE"
+            fi
+          done
+
+          if [ $MISSING -ne 0 ]; then
+            echo "One or more sensors were not enabled in config-ci.h"
+            exit 1
+          fi
+
+      - name: Compile firmware
         run: |
           arduino-cli compile \
-            --fqbn esp32:esp32:esp32doit-devkit-v1 \
-            --libraries ./interfaces,./sensors,./comms \
-            --build-property "build.extra_flags=-I./propulsion-firmware" \
-            ./propulsion-firmware
+            --fqbn $FQBN \
+            $SKETCH \
+            --libraries $LIBS \
+            --output-dir $BUILD_OUT \
+            --build-property "build.extra_flags=-I$SKETCH"
