@@ -3,7 +3,7 @@
 # Board and paths
 FQBN="esp32:esp32:esp32"
 SKETCH_DIR="./propulsion-firmware"
-LIBS="./sensors,./comms"
+LIBS="./interfaces,./sensors,./comms"
 BUILD_OUT="./build"
 
 # Flags
