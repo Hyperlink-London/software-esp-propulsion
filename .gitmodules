@@ -1,0 +1,3 @@
+[submodule "comms"]
+	path = comms
+	url = git@github.com:Hyperlink-London/software-esp-comms.git
