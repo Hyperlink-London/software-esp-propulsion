@@ -23,10 +23,10 @@ jobs:
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
 
-      - name: Install Arduino CLI
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
-          echo "$HOME/bin" >> $GITHUB_PATH
+      - name: Set up Arduino CLI
+        uses: arduino/setup-arduino-cli@v1
+        with:
+          version: latest
 
       - name: Install ESP32 Core
         run: |
@@ -50,7 +50,7 @@ jobs:
           done
 
           if [ $MISSING -ne 0 ]; then
-            echo "Not all sensors are registered in config-ci.h"
+            echo "::error ::Not all sensors are registered in config-ci.h"
             exit 1
           fi
 
