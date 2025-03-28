@@ -38,24 +38,8 @@ jobs:
 
       - name: Ensure all sensors are enabled in config-ci.h
         run: |
-          SENSOR_HEADERS=$(find sensors/src -maxdepth 1 -type f -name "*.h" -not -name "*Manager*" | sed -E 's#.*/(.*)\.h#\1#')
-          MISSING=0
-
-          echo "Checking sensors in sensors/src..."
-          for SENSOR in $SENSOR_HEADERS; do
-            DEFINE="USE_${SENSOR^^}"
-            if ! grep -q "$DEFINE" propulsion-firmware/config-ci.h; then
-              echo "Missing: $DEFINE in config-ci.h"
-              MISSING=1
-            else
-              echo "Found: $DEFINE"
-            fi
-          done
-
-          if [ $MISSING -ne 0 ]; then
-            echo "One or more sensors were not enabled in config-ci.h"
-            exit 1
-          fi
+          chmod +x ./check-sensor-defines.sh
+          ./check-sensor-defines.sh
 
       - name: Compile firmware
         run: |
