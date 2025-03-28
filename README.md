@@ -13,7 +13,7 @@ This repository consists of the following submodules:
 The firmware source code is located in the `propulsion-firmware/` directory.
 
 ```
-esp32-propulsion/
+software-esp-propulsion/
 ├── propulsion-firmware/         # Main Arduino sketch
 │   └── propulsion-firmware.ino
 ├── sensors/                     # Submodule: sensor logic
