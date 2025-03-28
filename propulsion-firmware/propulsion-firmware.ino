@@ -2,11 +2,11 @@
 #include <CommsOut.h>
 
 // Create global CommsOut and SensorManager instances
-CommsOut comms;
+CommsOut comms("esp-propulsion");
 SensorManager manager(&comms);
 
 void setup() {
-    Serial.begin(115200);
+    Serial.begin(9600);
     manager.setup();
 }
 

@@ -1,4 +1,3 @@
 .DS_Store
 build/
-
-finally write another md file explaining how Aquino libraries are sturcuted and how they work
+.vscode/
