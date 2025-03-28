@@ -1,4 +1,4 @@
-name: Build Firmware
+name: Build ESP32 Firmware
 
 on:
   push:
@@ -11,54 +11,42 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      FQBN: esp32:esp32:esp32doit-devkit-v1
-      SKETCH: ./propulsion-firmware
-      LIBS: ./sensors,./comms,./interfaces
-      BUILD_OUT: ./build
+      FQBN: "esp32:esp32:esp32doit-devkit-v1"
+      SKETCH: "./propulsion-firmware"
+      LIBS: "./sensors,./comms,./interfaces"
+      BUILD_OUT: "./build"
 
     steps:
-      - name: Checkout repository (with submodules)
+      # 1. Checkout with submodules
+      - name: Checkout repository with submodules
         uses: actions/checkout@v3
         with:
           submodules: recursive
           token: ${{ secrets.GH_TOKEN }}
 
-      - name: Set up Arduino CLI
-        uses: arduino/setup-arduino-cli@v1
-        with:
-          version: 0.35.2
+      # 2. Install Arduino CLI
+      - name: Install Arduino CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/arduino/arduino-cli/master/install.sh | sh
+          echo "$HOME/.arduino/bin" >> $GITHUB_PATH
 
+      # 3. Install ESP32 core
       - name: Install ESP32 Core
         run: |
           arduino-cli core update-index
           arduino-cli core install esp32:esp32
 
-      - name: Ensure all sensors are enabled in config-ci.h
-        run: |
-          SENSOR_HEADERS=$(find sensors/src -maxdepth 1 -type f -name "*.h" -not -name "*Manager*" | sed -E 's#.*/(.*)\.h#\1#')
-          MISSING=0
+      # 4. Run sensor config check
+      - name: Check all sensors are registered in config-ci.h
+        run: ./scripts/check-config-sensors.sh
 
-          echo "Checking sensors..."
-          for SENSOR in $SENSOR_HEADERS; do
-            DEFINE="USE_${SENSOR^^}"
-            if ! grep -q "$DEFINE" propulsion-firmware/config-ci.h; then
-              echo "Missing: $DEFINE in config-ci.h"
-              MISSING=1
-            else
-              echo "Found: $DEFINE"
-            fi
-          done
-
-          if [ $MISSING -ne 0 ]; then
-            echo "::error ::Not all sensors are registered in config-ci.h"
-            exit 1
-          fi
-
+      # 5. Compile firmware using CI config
       - name: Compile firmware
         run: |
+          mkdir -p $BUILD_OUT
           arduino-cli compile \
-            --fqbn $FQBN \
-            $SKETCH \
-            --libraries $LIBS \
-            --output-dir $BUILD_OUT \
-            --build-property build.extra_flags=-include=config-ci.h
+            --fqbn "$FQBN" \
+            --output-dir "$BUILD_OUT" \
+            --libraries "$LIBS" \
+            --build-property "build.extra_flags=-DCI_BUILD -include=config-ci.h" \
+            "$SKETCH"
