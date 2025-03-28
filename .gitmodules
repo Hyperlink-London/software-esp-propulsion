@@ -1,9 +1,9 @@
 [submodule "comms"]
 	path = comms
-	url = git@github.com:Hyperlink-London/software-esp-comms.git
+	url = https://github.com/Hyperlink-London/software-esp-comms.git
 [submodule "sensors"]
 	path = sensors
-	url = git@github.com:Hyperlink-London/software-esp-sensors.git
+	url = https://github.com/Hyperlink-London/software-esp-sensors.git
 [submodule "interfaces"]
 	path = interfaces
-	url = git@github.com:Hyperlink-London/software-esp-interfaces.git
+	url = https://github.com/Hyperlink-London/software-esp-interfaces.git

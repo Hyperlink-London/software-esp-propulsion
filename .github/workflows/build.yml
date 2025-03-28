@@ -11,10 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository (with submodules)
+      - name: Checkout repository (with private submodules)
         uses: actions/checkout@v3
         with:
           submodules: recursive
+          token: ${{ secrets.GH_TOKEN }}  # GH_TOKEN must be added as a repo secret
 
       - name: Set up Arduino CLI
         uses: arduino/setup-arduino-cli@v1
