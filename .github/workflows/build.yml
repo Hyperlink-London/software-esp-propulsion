@@ -21,7 +21,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN_PROPULSION }}
 
       - name: Set up Arduino CLI
         uses: arduino/setup-arduino-cli@v1
@@ -63,5 +63,5 @@ jobs:
       - name: Run semantic-release (auto tag, no GitHub release)
         if: success()
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_PROPULSION }}
         run: npx semantic-release
