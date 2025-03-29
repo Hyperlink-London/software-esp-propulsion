@@ -63,5 +63,5 @@ jobs:
       - name: Run semantic-release (auto tag, no GitHub release)
         if: success()
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_PROPULSION }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN_TAG }}
         run: npx semantic-release
