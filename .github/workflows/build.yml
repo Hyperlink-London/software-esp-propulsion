@@ -49,3 +49,19 @@ jobs:
             --libraries $LIBS \
             --output-dir $BUILD_OUT \
             --build-property "build.extra_flags=-I$SKETCH"
+
+      - name: Set up Node.js for semantic-release
+        if: success()
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install semantic-release and plugins
+        if: success()
+        run: npm install --save-dev semantic-release @semantic-release/commit-analyzer @semantic-release/release-notes-generator @semantic-release/changelog @semantic-release/git
+
+      - name: Run semantic-release (auto tag, no GitHub release)
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
