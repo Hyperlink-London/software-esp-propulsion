@@ -1,8 +1,10 @@
 #include <SensorManager.h>
 #include <CommsOut.h>
+#include <CommsIn.h>
 
-// Create global CommsOut and SensorManager instances
+// Create global instances
 CommsOut comms("esp-propulsion");
+CommsIn commsIn;
 SensorManager manager(&comms);
 
 void setup() {
@@ -12,5 +14,6 @@ void setup() {
 
 void loop() {
     manager.pollSensors();
-    delay(1000); // Basic polling interval
+    commsIn.receive();  // Check for incoming messages
+    delay(1000);  // Basic polling interval
 }
