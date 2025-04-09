@@ -34,7 +34,7 @@ jobs:
           arduino-cli core install esp32:esp32
 
       - name: Install libraries
-	      run: |
+        run: |
           arduino-cli lib install "ArduinoJson"
 
       - name: Apply CI config (enable all sensors)
