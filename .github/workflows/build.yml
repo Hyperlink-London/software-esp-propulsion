@@ -28,10 +28,11 @@ jobs:
         with:
           version: 0.34.0
 
-      - name: Install ESP32 Core
+      - name: Install ESP32 Core and JSON lib
         run: |
           arduino-cli core update-index
           arduino-cli core install esp32:esp32
+          arduino-cli lib install "ArduinoJson"
 
       - name: Apply CI config (enable all sensors)
         run: cp propulsion-firmware/config-ci.h propulsion-firmware/config.h
