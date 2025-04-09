@@ -9,6 +9,7 @@ BUILD_OUT="./build"
 # Flags
 UPLOAD=true
 UPLOAD_ONLY=false
+COMPILE_ONLY=false
 
 # Parse arguments
 for arg in "$@"; do
@@ -21,8 +22,19 @@ for arg in "$@"; do
       UPLOAD_ONLY=true
       echo "Upload-only mode enabled (--upload-only)"
       ;;
+    --compile-only)
+      COMPILE_ONLY=true
+      UPLOAD=false
+      echo "Compile-only mode enabled (--compile-only)"
+      ;;
   esac
 done
+
+# Check for invalid flag combinations
+if [ "$UPLOAD_ONLY" = true ] && [ "$COMPILE_ONLY" = true ]; then
+  echo "Error: --upload-only and --compile-only cannot be used together."
+  exit 1
+fi
 
 # Spinner and timer function
 run_with_spinner() {
@@ -66,7 +78,6 @@ if [ "$UPLOAD_ONLY" = false ]; then
   echo -n "Compiling firmware:  "
   TMP_LOG=$(mktemp)
 
-  # --build-property adds the main sketch directory to include path so config.h is visible in submodules (this was a pain to figure out...)
   arduino-cli compile \
     --fqbn "$FQBN" \
     --build-property "build.extra_flags=-I$SKETCH_DIR" \
@@ -83,10 +94,9 @@ if [ "$UPLOAD_ONLY" = false ]; then
   echo
   echo
 
-  # Print logs and cleanup
   cat "$TMP_LOG"
   rm -f "$TMP_LOG"
-  trap - INT TERM  # Disable trap now that we're done cleaning
+  trap - INT TERM
 
   if [ $COMP_STATUS -ne 0 ]; then
     echo "Build failed."
@@ -104,7 +114,7 @@ else
 fi
 
 # ---- Upload Phase ----
-if [ "$UPLOAD" = true ]; then
+if [ "$UPLOAD" = true ] && [ "$COMPILE_ONLY" = false ]; then
   echo "Available serial ports:"
   arduino-cli board list
 
@@ -112,7 +122,6 @@ if [ "$UPLOAD" = true ]; then
   echo
   read -p "Enter the port to upload to [default: $DEFAULT_PORT]: " PORT
 
-  # Use default if input is empty
   PORT="${PORT:-$DEFAULT_PORT}"
 
   echo -n "Uploading firmware to $PORT: "
