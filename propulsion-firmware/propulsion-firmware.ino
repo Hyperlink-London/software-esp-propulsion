@@ -17,17 +17,16 @@ void PollSensors(void *pvParameters) {
     while(true) {
         manager.pollSensors();
         vTaskDelay(pdMS_TO_TICKS(1000));
-        Serial_0.println("Hello from core 0");
     }
     
 }
 
 void HandleCommunication(void *pvParameters) {
     while (true) {
+        commsIn.isStale();
         commsIn.receive();
         commsOut.drainQueue();
         vTaskDelay(pdMS_TO_TICKS(5));
-        Serial_0.println("Hello from core 1");
     }
 }
 
