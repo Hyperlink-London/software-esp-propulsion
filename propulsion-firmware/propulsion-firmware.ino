@@ -1,40 +1,42 @@
 #include <SensorManager.h>
 #include <CommsOut.h>
 #include <CommsIn.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
+#include <SerialAliases.h>
 
-// Create global instances
-CommsOut comms("esp-propulsion");
+CommsOut commsOut("esp-propulsion");
 CommsIn commsIn;
-SensorManager manager(&comms);
+SensorManager manager(&commsOut);
 
 
 TaskHandle_t SensorTask;
 TaskHandle_t CommTask;
 
-// Sensor polling (Core 0)
 void PollSensors(void *pvParameters) {
     while(true) {
-        Serial.printf("SensorTask running on Core %d. Free Heap: %d\n", xPortGetCoreID(), esp_get_free_heap_size());
         manager.pollSensors();
-        delay(1000);
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        Serial_0.println("Hello from core 0");
     }
     
 }
 
-// Communication handling (Core 1)
 void HandleCommunication(void *pvParameters) {
     while (true) {
-        Serial.printf("CommTask running on Core %d. Free Heap: %d\n", xPortGetCoreID(), esp_get_free_heap_size());
-        delay(1000);
+        commsIn.receive();
+        commsOut.drainQueue();
+        vTaskDelay(pdMS_TO_TICKS(5));
+        Serial_0.println("Hello from core 1");
     }
 }
 
 
 void setup() {
-    Serial.begin(9600);
+    Serial_1.begin(9600);
+    Serial_0.begin(115200, SERIAL_8N1, 16, 17); // adjust pins as needed
+
     manager.setup();
-    // Assign tasks to cores
-    // Assign sensor polling to Core 0
     xTaskCreatePinnedToCore(
         PollSensors,  
         "SensorTask",  
@@ -45,7 +47,6 @@ void setup() {
         0            
     );
 
-    // Assign communication handling to Core 1
     xTaskCreatePinnedToCore(
         HandleCommunication,
         "CommTask",
@@ -55,13 +56,7 @@ void setup() {
         &CommTask,
         1
     );
-
-
-
 }
 
 void loop() {
-    //manager.pollSensors();
-    //delay(1000); // Basic polling interval
-    //Serial.println("Looping...");
 }
