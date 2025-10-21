@@ -17,7 +17,7 @@ void PollSensors(void *pvParameters) {
     if(!manager.arePinsValidated()) {
         Serial_1.println("ERROR: Pins are not validated! SensorManager will not operate on core 0.");
     }
-    while(manager.arePinsValidated()) {
+    while(true) {
         manager.pollSensors();
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
@@ -38,6 +38,9 @@ void HandleCommunication(void *pvParameters) {
 void setup() {
     Serial_1.begin(9600);
     Serial_0.begin(115200, SERIAL_8N1, 16, 17); // adjust pins as needed
+
+    delay(10000); // TODO: to prevent cutoff, maybe need to think about this
+    Serial_1.println("");
 
     manager.setup();
     xTaskCreatePinnedToCore(
