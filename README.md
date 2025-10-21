@@ -41,8 +41,10 @@ software-esp-propulsion/
   ```
 - This repository cloned **recursively** to include all submodules:
   ```bash
-  git clone <repo-url / repo-ssh>
+  git clone --recursive-submodules <repo-url / repo-ssh>
   ```
+
+  # TODO: explain pulling workflow for recursive submodules
 
 ### Build Instructions
 
