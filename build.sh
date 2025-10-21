@@ -80,7 +80,7 @@ if [ "$UPLOAD_ONLY" = false ]; then
 
   arduino-cli compile \
     --fqbn "$FQBN" \
-    --build-property "build.extra_flags=-I$SKETCH_DIR" \
+    --build-property "build.extra_flags=-I$SKETCH_DIR -Wall -Wextra -Wpedantic" \
     "$SKETCH_DIR" \
     --libraries $LIBS \
     --output-dir "$BUILD_OUT" > "$TMP_LOG" 2>&1 &

@@ -1,9 +1,9 @@
+#include <SerialAliases.h>
 #include <SensorManager.h>
 #include <CommsOut.h>
 #include <CommsIn.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
-#include <SerialAliases.h>
 
 CommsOut commsOut("esp-propulsion");
 CommsIn commsIn;
@@ -14,7 +14,10 @@ TaskHandle_t SensorTask;
 TaskHandle_t CommTask;
 
 void PollSensors(void *pvParameters) {
-    while(true) {
+    if(!manager.arePinsValidated()) {
+        Serial_1.println("ERROR: Pins are not validated! SensorManager will not operate on core 0.");
+    }
+    while(manager.arePinsValidated()) {
         manager.pollSensors();
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
