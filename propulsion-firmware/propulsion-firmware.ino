@@ -25,6 +25,7 @@ void PollSensors(void *pvParameters) {
 }
 
 void HandleCommunication(void *pvParameters) {
+    // TODO: Should not be a while true, should be a while connected to OBC and if not try to reconnect
     while (true) {
         commsIn.isStale();
         commsIn.receive();
