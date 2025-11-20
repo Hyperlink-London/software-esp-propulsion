@@ -5,8 +5,33 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
 
+// Forward declarations for command functions
+void turn_on_brake();
+void turn_off_brake();
+// Add more command functions as needed
+
+// Command handler implementations
+void turn_on_brake() {
+    Serial_1.println("Brake turned ON");
+    // Add your brake control logic here
+}
+
+void turn_off_brake() {
+    Serial_1.println("Brake turned OFF");
+    // Add your brake control logic here
+}
+
+// Define command map
+CommandMap commands[] = {
+    {"turn_on_brake", turn_on_brake},
+    {"turn_off_brake", turn_off_brake},
+    // Add more commands here as needed
+};
+
+const size_t commandCount = sizeof(commands) / sizeof(commands[0]);
+
 CommsOut commsOut("esp-propulsion");
-CommsIn commsIn;
+CommsIn commsIn("esp-propulsion", commands, commandCount);
 SensorManager manager(&commsOut);
 
 
