@@ -68,6 +68,15 @@ trap cleanup INT TERM
 
 # ---- Compilation Phase ----
 if [ "$UPLOAD_ONLY" = false ]; then
+  # Install required libraries
+  echo "Checking for required libraries..."
+  if ! arduino-cli lib list | grep -q "ArduinoJson"; then
+    echo "Installing ArduinoJson library..."
+    arduino-cli lib install "ArduinoJson"
+  else
+    echo "ArduinoJson library already installed."
+  fi
+
   # Clean build directory
   if [ -d "$BUILD_OUT" ]; then
     echo "Cleaning existing build directory..."
