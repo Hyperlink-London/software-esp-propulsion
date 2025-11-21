@@ -4,22 +4,7 @@
 #include <CommsIn.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
-
-// Forward declarations for command functions
-void turn_on_brake();
-void turn_off_brake();
-// Add more command functions as needed
-
-// Command handler implementations
-void turn_on_brake() {
-    Serial_1.println("Brake turned ON");
-    // Add your brake control logic here
-}
-
-void turn_off_brake() {
-    Serial_1.println("Brake turned OFF");
-    // Add your brake control logic here
-}
+#include "commands.h"
 
 // Define command map
 CommandMap commands[] = {
