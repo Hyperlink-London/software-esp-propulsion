@@ -1,6 +1,7 @@
 #include "commands.h"
 #include <SerialAliases.h>
 #include <Arduino.h>
+#include "config.h"
 
 // Command handler implementations
 void turn_on_brake() {
