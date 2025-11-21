@@ -66,16 +66,108 @@ cleanup() {
 }
 trap cleanup INT TERM
 
+# Function to check ESP32 core is installed
+check_esp32_core() {
+  echo "Checking for ESP32 core..."
+  if arduino-cli core list | grep -q "esp32:esp32"; then
+    echo "✓ ESP32 core is installed."
+    return 0
+  else
+    echo "✗ ESP32 core is not installed."
+    echo "Installing ESP32 core..."
+    if arduino-cli core update-index && arduino-cli core install esp32:esp32; then
+      echo "✓ ESP32 core installed successfully."
+      return 0
+    else
+      echo "✗ Failed to install ESP32 core."
+      return 1
+    fi
+  fi
+}
+
+# Function to check and install dependencies
+check_and_install_dependencies() {
+  echo "Checking for required libraries..."
+  
+  # Local libraries that don't need to be installed (they're in the repo)
+  local LOCAL_LIBS=("Interfaces")
+  
+  # Cores that don't need to be installed as libraries
+  local CORES=("Arduino")
+  
+  # Collect all dependencies from library.properties and firmware.properties files
+  local ALL_DEPS=()
+  
+  # Find all library.properties and firmware.properties files and extract dependencies
+  while IFS= read -r props_file; do
+    if [ -f "$props_file" ]; then
+      # Extract depends line and split by comma
+      local deps_line=$(grep "^depends=" "$props_file" | cut -d'=' -f2)
+      if [ -n "$deps_line" ]; then
+        # Split comma-separated dependencies
+        IFS=',' read -ra DEPS <<< "$deps_line"
+        for dep in "${DEPS[@]}"; do
+          # Trim whitespace
+          dep=$(echo "$dep" | xargs)
+          # Skip if empty, local library, or core
+          if [ -n "$dep" ]; then
+            local skip=false
+            for local_lib in "${LOCAL_LIBS[@]}"; do
+              if [ "$dep" = "$local_lib" ]; then
+                skip=true
+                break
+              fi
+            done
+            for core in "${CORES[@]}"; do
+              if [ "$dep" = "$core" ]; then
+                skip=true
+                break
+              fi
+            done
+            if [ "$skip" = false ]; then
+              ALL_DEPS+=("$dep")
+            fi
+          fi
+        done
+      fi
+    fi
+  done < <(find . -name "library.properties" -o -name "firmware.properties" -type f)
+  
+  # Remove duplicates
+  local UNIQUE_DEPS=($(printf "%s\n" "${ALL_DEPS[@]}" | sort -u))
+  
+  if [ ${#UNIQUE_DEPS[@]} -eq 0 ]; then
+    echo "No external dependencies found."
+    return 0
+  fi
+  
+  # Check and install each dependency
+  for lib in "${UNIQUE_DEPS[@]}"; do
+    if arduino-cli lib list | grep -q "^$lib "; then
+      echo "✓ $lib library already installed."
+    else
+      echo "Installing $lib library..."
+      if arduino-cli lib install "$lib"; then
+        echo "✓ $lib library installed successfully."
+      else
+        echo "✗ Failed to install $lib library."
+        return 1
+      fi
+    fi
+  done
+  
+  echo "All dependencies checked."
+  echo
+}
+
 # ---- Compilation Phase ----
 if [ "$UPLOAD_ONLY" = false ]; then
-  # Install required libraries
-  echo "Checking for required libraries..."
-  if ! arduino-cli lib list | grep -q "ArduinoJson"; then
-    echo "Installing ArduinoJson library..."
-    arduino-cli lib install "ArduinoJson"
-  else
-    echo "ArduinoJson library already installed."
-  fi
+  # Check ESP32 core is installed (required for FreeRTOS headers)
+  check_esp32_core || exit 1
+  echo
+  
+  # Check and install all dependencies from library.properties files
+  check_and_install_dependencies || exit 1
 
   # Clean build directory
   if [ -d "$BUILD_OUT" ]; then
