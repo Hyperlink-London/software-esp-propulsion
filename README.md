@@ -74,8 +74,10 @@ By default, the script will flash to the first connected device identified as `e
 The firmware is built around modular components with strict separation of concerns:
 
 - **SensorManager**: Resides in the `sensors` module. Responsible for managing active sensors, polling data, and forwarding values.
-- **CommsOut**: Resides in the `comms` module. Implements a `CommsOutInterface` used by `SensorManager` to send sensor data.
+- **CommsOut**: Resides in the `comms` module. Implements a `CommsOutInterface` used by `SensorManager` to send sensor data. Also handles transmission of sensor data and ACK messages via serial communication.
+- **CommsIn**: Resides in the `comms` module. Handles incoming commands from the OBC, validates ESP ID, executes commands through a dynamic command map, and sends ACK responses.
 - **CommsOutInterface**: Defined in the `interfaces` module to decouple `sensors` from `comms`.
+- **CommsInInterface**: Defined in the `interfaces` module to provide a standard interface for command reception.
 
 This modular design enables flexible integration, testing, and future support for multiple communication or sensor configurations.
 
