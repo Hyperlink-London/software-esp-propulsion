@@ -79,6 +79,48 @@ The firmware is built around modular components with strict separation of concer
 
 This modular design enables flexible integration, testing, and future support for multiple communication or sensor configurations.
 
+## Core Architecture
+
+The ESP32 dual-core architecture is utilised to separate sensor polling from communication handling:
+
+### Core 0: Sensor Polling
+- **Task**: `PollSensors` (SensorTask)
+- **Classes Used**:
+  - `SensorManager` (from `sensors` module): Manages and polls all active sensors
+  - `CommsOut` (from `comms` module): Queues sensor data for transmission
+- **Responsibilities**:
+  - Polls all active sensors every 1000ms via `SensorManager::pollSensors()`
+  - Collects sensor data and forwards to `CommsOut::send()`
+  - Sensor data is queued for transmission to avoid blocking sensor polling
+- **Communication**: Sensor data is queued using FreeRTOS queue, not sent directly
+
+### Core 1: Communication Handling
+- **Task**: `HandleCommunication` (CommTask)
+- **Classes Used**:
+  - `CommsIn` (from `comms` module): Handles incoming commands from OBC
+  - `CommsOut` (from `comms` module): Transmits sensor data and ACK messages
+- **Responsibilities**:
+  - Receives commands from OBC via `CommsIn::receive()` (every 5ms)
+  - Validates ESP ID and executes commands through the command map
+  - Sends ACK messages back to OBC via `CommsOut::sendAck()`
+  - Drains the sensor data queue and transmits via `CommsOut::drainQueue()` (every 5ms)
+  - Monitors communication staleness via `CommsIn::isStale()`
+- **Communication**: All serial communication (Serial_1) is handled on this core to prevent conflicts
+
+### Inter-Core Communication
+
+**FreeRTOS Queue**:
+- Sensor data from Core 0 is queued using `xQueueSend()` when `CommsOut::send()` is called
+- Core 1 drains the queue using `CommsOut::drainQueue()` and transmits data via Serial_1
+- Queue size: 32 messages
+- If `CommsOut::send()` is called from Core 1, it bypasses the queue and sends directly (useful for ACK messages)
+
+**Serial Communication**:
+- **Serial_1** (9600 baud): Used for OBC communication (commands and sensor data)
+- **Serial_0** (115200 baud): Used for debugging/development
+
+This architecture ensures that sensor polling remains non-blocking and communication handling is responsive, preventing sensor data loss while maintaining real-time command processing.
+
 ## Development Notes
 
 - Submodules are structured as Arduino-compatible libraries with `library.properties` files.

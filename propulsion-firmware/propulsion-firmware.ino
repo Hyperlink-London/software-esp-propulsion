@@ -16,7 +16,7 @@ CommandMap commands[] = {
 const size_t commandCount = sizeof(commands) / sizeof(commands[0]);
 
 CommsOut commsOut("esp-propulsion");
-CommsIn commsIn("esp-propulsion", commands, commandCount);
+CommsIn commsIn("esp-propulsion", commands, commandCount, &commsOut);
 SensorManager manager(&commsOut);
 
 
